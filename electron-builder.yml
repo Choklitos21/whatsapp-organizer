@@ -2,7 +2,7 @@ appId: com.diego.whatsapp-organizer
 productName: WhatsApp Organizer
 copyright: Copyright © 2026 Cho
 
-publish: never
+publish: null
 
 directories:
   output: dist
