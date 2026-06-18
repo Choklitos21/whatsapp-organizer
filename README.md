@@ -1,8 +1,8 @@
 # WhatsApp Organizer
 
-> Descarga y organiza automáticamente archivos recibidos por WhatsApp.
+> Automatically downloads and organizes files received via WhatsApp.
 
-Aplicación de escritorio (Electron) que se conecta a WhatsApp, descarga los archivos multimedia que recibes y los organiza en carpetas por cliente y fecha.
+Desktop application (Electron) that connects to WhatsApp, downloads media files you receive, and organizes them into folders by client and date.
 
 ![License](https://img.shields.io/badge/license-ISC-blue)
 ![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen)
@@ -10,182 +10,182 @@ Aplicación de escritorio (Electron) que se conecta a WhatsApp, descarga los arc
 
 ---
 
-## Características
+## Features
 
-- **Autenticación QR** — Escanea con tu celular y la sesión se guarda para usos futuros.
-- **Barrido automático** — Al conectarse, revisa mensajes antiguos de los últimos N días.
-- **Procesamiento en tiempo real** — Detecta y descarga archivos nuevos al instante.
-- **Organización automática** — Guarda los archivos en `~/Documents/Clientes3D/{Empresa}/{Fecha}/{Archivo}`.
-- **Gestión de clientes** — Asigna números de teléfono a nombres de empresa.
-- **Filtros de descarga** — Elige qué tipos de archivos descargar (documentos, imágenes, videos, audio, stickers).
-- **Tema oscuro/claro** — Alterna entre modos con persistencia en `localStorage`.
-- **Ruta de guardado configurable** — Cambia la carpeta de destino desde la interfaz.
-- **Abrir archivo / carpeta** — Botones para abrir cada archivo o mostrar su ubicación.
-- **Cancelar barrido** — Detén la búsqueda de mensajes antiguos en cualquier momento.
-- **Limpieza de base de datos** — Elimina registros de más de 90 días.
-- **Deduplicación** — Los archivos ya procesados no se descargan de nuevo.
-- **Cerrar sesión** — Borra la sesión guardada y vuelve a escanear QR.
+- **QR Authentication** — Scan with your phone; the session is saved for future use.
+- **Automatic Sweep** — On connect, scans recent messages from the last N days.
+- **Real-time Processing** — Detects and downloads new files instantly.
+- **Automatic Organization** — Saves files into `~/Documents/Clientes3D/{Client}/{Date}/{Filename}`.
+- **Client Management** — Assign phone numbers to company names.
+- **Download Filters** — Choose which file types to download (documents, images, videos, audio, stickers).
+- **Dark/Light Theme** — Toggle between modes with `localStorage` persistence.
+- **Configurable Save Path** — Change the destination folder from the interface.
+- **Open File / Folder** — Buttons to open each file or reveal its location.
+- **Cancel Sweep** — Stop the old-message search at any time.
+- **Database Cleanup** — Remove records older than 90 days.
+- **Deduplication** — Already processed files are never downloaded again.
+- **Log Out** — Clear the saved session and re-scan the QR code.
 
 ---
 
-## Requisitos
+## Prerequisites
 
 - Node.js 18+
 - pnpm (`npm i -g pnpm`)
-- Una cuenta de WhatsApp activa
+- An active WhatsApp account
 
 ---
 
-## Instalación
+## Installation
 
 ```bash
-# Clonar el repositorio
+# Clone the repository
 git clone <url>
 cd Laura
 
-# Instalar dependencias
+# Install dependencies
 pnpm install
 
-# (Opcional) Configurar clientes
+# (Optional) Configure clients
 cp clientes.example.json clientes.json
-# Edita clientes.json con tus números y empresas
+# Edit clientes.json with your phone numbers and companies
 ```
 
-### Formato de `clientes.json`
+### `clientes.json` format
 
 ```json
 {
-  "573001234567@c.us": "Mi Empresa",
-  "573009876543@c.us": "Otra Empresa"
+  "573001234567@c.us": "My Company",
+  "573009876543@c.us": "Another Company"
 }
 ```
 
-Los números deben incluir el código de país sin el signo `+`. Los contactos no configurados se clasifican como **"Sin clasificar"**.
+Numbers must include the country code without the `+` sign. Unconfigured contacts are classified as **"Sin clasificar"**.
 
 ---
 
-## Uso
+## Usage
 
 ```bash
-# Modo desarrollo
+# Development mode
 pnpm dev
 
-# Compilar instalador para Windows
+# Build Windows installer
 pnpm build
 ```
 
 ---
 
-## Cómo funciona
+## How It Works
 
-1. La aplicación inicia una ventana de Electron e inicializa el cliente de WhatsApp.
-2. Si no hay sesión guardada, muestra un código QR para escanear desde WhatsApp (Dispositivos vinculados).
-3. Al autenticarse, construye un mapa de nombres de contacto → empresas y barre los mensajes antiguos.
-4. Por cada chat, obtiene los últimos mensajes dentro del rango configurado.
-5. Descarga los archivos que coinciden con los tipos seleccionados.
-6. Guarda cada archivo en `~/Documents/Clientes3D/{Empresa}/{Fecha}/{Nombre}`.
-7. Registra el ID del mensaje en SQLite para evitar duplicados.
-8. Escucha mensajes nuevos en tiempo real y los procesa igual que los antiguos.
+1. The app starts an Electron window and initializes the WhatsApp client.
+2. If there is no saved session, it displays a QR code to scan from WhatsApp (Linked Devices).
+3. Once authenticated, it builds a contact name → company map and sweeps old messages.
+4. For each chat, it fetches the most recent messages within the configured range.
+5. It downloads files matching the selected types.
+6. Each file is saved to `~/Documents/Clientes3D/{Client}/{Date}/{Filename}`.
+7. The message ID is recorded in SQLite to prevent duplicates.
+8. New incoming messages are listened for and processed the same way as old ones.
 
 ---
 
-## Arquitectura
+## Architecture
 
 ```
 Laura/
 ├── src/
-│   ├── main.js          # Proceso principal: WhatsApp, SQLite, IPC, archivos
-│   ├── preload.js        # Puente seguro (contextBridge) entre main y renderer
+│   ├── main.js          # Main process: WhatsApp, SQLite, IPC, file I/O
+│   ├── preload.js       # Secure bridge (contextBridge) between main and renderer
 │   └── ui/
-│       ├── index.html    # Estructura HTML (4 pantallas + modal)
-│       ├── renderer.js   # Lógica de la interfaz
-│       └── style.css     # Estilos con modo oscuro y animaciones
-├── clientes.json         # Mapeo de teléfonos → empresas
-├── electron-builder.yml  # Configuración del empaquetado
-├── package.json          # Dependencias y scripts
+│       ├── index.html   # HTML structure (4 screens + modal)
+│       ├── renderer.js  # UI logic
+│       └── style.css    # Styles with dark mode and animations
+├── clientes.json        # Phone number → company name mapping
+├── electron-builder.yml # Packaging configuration
+├── package.json         # Dependencies and scripts
 └── assets/
-    └── icon.ico          # Ícono de la aplicación
+    └── icon.ico         # Application icon
 ```
 
 ---
 
-## Canales IPC
+## IPC Channels
 
-### Eventos (Main → Renderer)
+### Events (Main → Renderer)
 
-| Canal        | Descripción                     |
-|-------------|---------------------------------|
-| `qr`         | URL del código QR en base64     |
-| `status`     | Estado de conexión              |
-| `new-file`   | Notificación de archivo nuevo   |
+| Channel      | Description                        |
+|-------------|------------------------------------|
+| `qr`        | QR code data URL (base64)          |
+| `status`    | Connection status                  |
+| `new-file`  | New file saved notification        |
 
-### Invocaciones (Renderer → Main)
+### Invocations (Renderer → Main)
 
-| Método           | Descripción                         |
-|-----------------|-------------------------------------|
-| `openFolder`    | Abrir carpeta base en el explorador |
-| `getBasePath`   | Obtener ruta de guardado actual     |
-| `selectFolder`  | Selector nativo de carpeta          |
-| `setBasePath`   | Cambiar ruta de guardado            |
-| `openFile`      | Abrir un archivo                    |
-| `showInFolder`  | Mostrar archivo en el explorador    |
-| `getClients`    | Obtener mapeo de clientes           |
-| `getContacts`   | Obtener contactos de WhatsApp       |
-| `saveClients`   | Guardar mapeo de clientes           |
-| `getConfig`     | Obtener configuración               |
-| `setConfig`     | Guardar configuración               |
-| `sweepMessages` | Iniciar barrido de mensajes         |
-| `cancelSweep`   | Cancelar barrido en curso           |
-| `cleanDB`       | Limpiar registros antiguos (>90d)   |
-| `logout`        | Cerrar sesión y reiniciar           |
-
----
-
-## Estados de conexión
-
-| Estado            | Significado                         |
-|------------------|-------------------------------------|
-| `starting`       | Inicializando cliente               |
-| `authenticated`  | Sesión autenticada                  |
-| `ready`          | Cliente listo                       |
-| `sweeping`       | Revisando mensajes anteriores       |
-| `connected`      | Conectado y escuchando              |
-| `disconnected`   | Desconectado (se muestra QR de nuevo) |
-| `error-auth`     | Error de autenticación              |
-| `error-init`     | Error al iniciar                    |
+| Method          | Description                            |
+|----------------|----------------------------------------|
+| `openFolder`   | Open base folder in file explorer      |
+| `getBasePath`  | Get current save path                  |
+| `selectFolder` | Native folder picker dialog            |
+| `setBasePath`  | Change save path                       |
+| `openFile`     | Open a file                            |
+| `showInFolder` | Show file in file explorer             |
+| `getClients`   | Get client mapping                     |
+| `getContacts`  | Get WhatsApp contacts                  |
+| `saveClients`  | Save client mapping                    |
+| `getConfig`    | Get configuration                      |
+| `setConfig`    | Save configuration                     |
+| `sweepMessages`| Start message sweep                    |
+| `cancelSweep`  | Cancel ongoing sweep                   |
+| `cleanDB`      | Clean old records (>90 days)           |
+| `logout`       | Log out and restart                    |
 
 ---
 
-## Almacenamiento
+## Connection Statuses
 
-| Elemento          | Ubicación                                          |
-|------------------|----------------------------------------------------|
-| Archivos descargados | `~/Documents/Clientes3D/{Empresa}/{Fecha}/`     |
-| Base de datos     | `%APPDATA%/whatsapp-organizer/procesados.db`       |
-| Configuración     | `%APPDATA%/whatsapp-organizer/config.json`         |
-| Sesión WhatsApp   | `%APPDATA%/whatsapp-organizer/wwebjs_auth/`        |
-| Cache             | `.wwebjs_cache/` (en la raíz del proyecto)         |
+| Status          | Meaning                                   |
+|----------------|-------------------------------------------|
+| `starting`     | Client is initializing                     |
+| `authenticated`| Session authenticated                      |
+| `ready`        | Client ready                               |
+| `sweeping`     | Scanning old messages                      |
+| `connected`    | Connected and listening                    |
+| `disconnected` | Disconnected (QR shown again)              |
+| `error-auth`   | Authentication error                       |
+| `error-init`   | Initialization error                       |
+
+---
+
+## Storage
+
+| Item              | Location                                             |
+|------------------|------------------------------------------------------|
+| Downloaded files | `~/Documents/Clientes3D/{Client}/{Date}/`            |
+| Database         | `%APPDATA%/whatsapp-organizer/procesados.db`         |
+| Configuration    | `%APPDATA%/whatsapp-organizer/config.json`           |
+| WhatsApp session | `%APPDATA%/whatsapp-organizer/wwebjs_auth/`          |
+| Cache            | `.wwebjs_cache/` (in project root)                   |
 
 ---
 
 ## Tech Stack
 
-| Tecnología       | Versión   | Propósito                    |
-|-----------------|-----------|------------------------------|
-| Electron        | 42.4.1    | Ventana de escritorio        |
-| whatsapp-web.js | 1.34.7    | Cliente de WhatsApp          |
-| better-sqlite3  | 12.11.1   | Base de datos de dedup       |
-| qrcode          | 1.5.4     | Generar QR en el cliente     |
-| date-fns        | 4.4.0     | Utilidades de fecha          |
-| electron-builder| 26.15.3   | Empaquetado para Windows     |
-| pnpm            | 10.29.3   | Gestor de paquetes           |
+| Technology      | Version  | Purpose                          |
+|----------------|----------|----------------------------------|
+| Electron       | 42.4.1   | Desktop window                   |
+| whatsapp-web.js| 1.34.7   | WhatsApp client                  |
+| better-sqlite3 | 12.11.1  | Dedup database                   |
+| qrcode         | 1.5.4    | QR generation in the client      |
+| date-fns       | 4.4.0    | Date utilities                   |
+| electron-builder| 26.15.3 | Windows packaging                |
+| pnpm           | 10.29.3  | Package manager                  |
 
 ---
 
-## Autor
+## Author
 
-Creado por **Choklitos**.
+Created by **Choklitos**.
 
 ```
-Copyright © 2025 Cho
+Copyright © 2026 Cho
 ```
