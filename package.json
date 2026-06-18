@@ -4,6 +4,7 @@
   "description": "Descarga y organiza automáticamente archivos recibidos por WhatsApp",
   "main": "src/main.js",
   "scripts": {
+    "prebuild": "powershell -ExecutionPolicy Bypass -File ./scripts/download-chrome.ps1",
     "dev": "electron .",
     "build": "electron-builder --win"
   },

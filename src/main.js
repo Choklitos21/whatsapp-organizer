@@ -236,8 +236,7 @@ function initWhatsApp() {
   const puppeteerConfig = app.isPackaged
     ? {
         executablePath: path.join(
-          process.resourcesPath, 'chromium',
-          process.platform === 'win32' ? 'chrome.exe' : 'chrome'
+          process.resourcesPath, 'chromium', 'chrome-win64', 'chrome.exe'
         ),
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
       }
@@ -298,16 +297,37 @@ function initWhatsApp() {
 
   sendToUI('status', 'starting');
 
-  // Timeout in case initialization hangs (no network, Chromium won't start, etc.)
+  // Timeout for overall initialization (Chromium launch + page load)
   const initTimer = setTimeout(() => {
-    console.error('[Init] Timeout — could not load WhatsApp Web in 60s.');
+    console.error('[Init] Timeout — could not start WhatsApp Web in 30s.');
     sendToUI('status', 'error-init');
-  }, 60_000);
+  }, 30_000);
+
+  // Timeout for QR code display — if no QR after 25s, something is wrong
+  let qrTimer = setTimeout(() => {
+    console.error('[QR] Timeout — QR code not generated within 25s.');
+    sendToUI('status', 'error-init');
+  }, 25_000);
+
+  // Override QR handler to clear the QR timer on first QR
+  const origQrHandler = client.listeners('qr')[0];
+  client.removeListener('qr', origQrHandler);
+  client.on('qr', async qr => {
+    clearTimeout(qrTimer);
+    qrTimer = null;
+    try {
+      const qrDataUrl = await QRCode.toDataURL(qr, { margin: 2, width: 280 });
+      sendToUI('qr', qrDataUrl);
+    } catch (err) {
+      console.error('Error generating QR:', err.message);
+    }
+  });
 
   client.initialize().then(() => {
     clearTimeout(initTimer);
   }).catch(err => {
     clearTimeout(initTimer);
+    clearTimeout(qrTimer);
     console.error('[Init error]', err.message);
     sendToUI('status', 'error-init');
   });

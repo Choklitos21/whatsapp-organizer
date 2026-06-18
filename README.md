@@ -66,13 +66,54 @@ Numbers must include the country code without the `+` sign. Unconfigured contact
 
 ## Usage
 
+Before building, the `prebuild` script automatically downloads **Chrome for Testing** (~150MB) and bundles it with the installer. This is required for the app to launch WhatsApp Web on the client's machine without needing Chrome installed.
+
 ```bash
 # Development mode
 pnpm dev
 
-# Build Windows installer
+# Build Windows installer (signs if certificate is configured)
 pnpm build
 ```
+
+> **Note**: The first build will download Chrome for Testing automatically. Subsequent builds reuse the cached download unless the version changes.
+
+---
+
+## Code Signing
+
+The installer can be digitally signed to reduce Windows SmartScreen warnings.
+
+### Generate a self-signed certificate (free)
+
+```powershell
+# Run from the project root (requires PowerShell as admin)
+.\scripts\generate-cert.ps1
+```
+
+This creates `cert/cert.pfx` and `cert/cert.cer` plus a password file.
+
+### Build with signing
+
+Set environment variables before building:
+
+```powershell
+$env:WIN_CSC_LINK = (Resolve-Path "cert/cert.pfx").Path
+$env:WIN_CSC_KEY_PASSWORD = "WhatsAppOrg2026!"
+pnpm build
+```
+
+### Trust the certificate on a client machine
+
+Share `cert/cert.cer` with your client. They run (as admin):
+
+```powershell
+.\scripts\trust-cert.ps1 -CerPath ".\cert.cer"
+```
+
+After that, SmartScreen will no longer block the installer.
+
+> **Note**: A self-signed certificate works for distribution to known clients. For public distribution, buy an EV code signing certificate from a Certificate Authority.
 
 ---
 

@@ -1,6 +1,6 @@
 appId: com.diego.whatsapp-organizer
 productName: WhatsApp Organizer
-copyright: Copyright © 2025 Cho
+copyright: Copyright © 2026 Cho
 
 directories:
   output: dist
@@ -8,13 +8,15 @@ directories:
 
 files:
   - src/**/*
-  - clientes.json
+  - clientes.empty.json
   - package.json
   - node_modules/**/*
 
 extraResources:
-  - from: clientes.json
+  - from: clientes.empty.json
     to: clientes.json
+  - from: chromium
+    to: chromium
 
 win:
   target:
