@@ -45,6 +45,17 @@ jobs:
           path: chromium
           key: ${{ matrix.os }}-chromium-146
 
+      - name: Install Windows Build Tools
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: choco install visualstudio2022-workload-vcdesktop -y --no-progress
+
+      - name: Setup MSVC
+        if: matrix.os == 'windows-latest'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          vsversion: '2022'
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
