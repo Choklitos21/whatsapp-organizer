@@ -11,7 +11,10 @@
     "build:linux": "node ./scripts/download-chrome.js && electron-builder --linux"
   },
   "keywords": [],
-  "author": "Choklitos",
+  "author": {
+    "name": "Choklitos",
+    "email": "bladucar@gmail.com"
+  },
   "license": "ISC",
   "packageManager": "pnpm@10.29.3",
   "devDependencies": {
