@@ -4,9 +4,11 @@
   "description": "Descarga y organiza automáticamente archivos recibidos por WhatsApp",
   "main": "src/main.js",
   "scripts": {
-    "prebuild": "powershell -ExecutionPolicy Bypass -File ./scripts/download-chrome.ps1",
+    "prebuild": "node ./scripts/download-chrome.js",
     "dev": "electron .",
-    "build": "electron-builder --win"
+    "build": "electron-builder --win --linux",
+    "build:win": "electron-builder --win",
+    "build:linux": "electron-builder --linux"
   },
   "keywords": [],
   "author": "Choklitos",

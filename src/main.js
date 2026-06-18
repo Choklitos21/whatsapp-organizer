@@ -233,10 +233,13 @@ async function rebuildNameToCompany(client) {
 // WhatsApp
 // ---------------------------------------------------------------------------
 function initWhatsApp() {
+  const chromeDir = process.platform === 'win32' ? 'chrome-win64' : 'chrome-linux64';
+  const chromeExe = process.platform === 'win32' ? 'chrome.exe' : 'chrome';
+
   const puppeteerConfig = app.isPackaged
     ? {
         executablePath: path.join(
-          process.resourcesPath, 'chromium', 'chrome-win64', 'chrome.exe'
+          process.resourcesPath, 'chromium', chromeDir, chromeExe
         ),
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
       }

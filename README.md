@@ -66,17 +66,87 @@ Numbers must include the country code without the `+` sign. Unconfigured contact
 
 ## Usage
 
-Before building, the `prebuild` script automatically downloads **Chrome for Testing** (~150MB) and bundles it with the installer. This is required for the app to launch WhatsApp Web on the client's machine without needing Chrome installed.
+Before building, the `prebuild` script automatically downloads **Chrome for Testing** (~150MB) and bundles it with the installer. This is required for the app to launch WhatsApp Web without needing Chrome installed.
 
 ```bash
 # Development mode
 pnpm dev
 
-# Build Windows installer (signs if certificate is configured)
+# Build for current platform
 pnpm build
+
+# Build for specific platform
+pnpm build:win     # Windows NSIS installer
+pnpm build:linux   # Linux AppImage + deb
 ```
 
-> **Note**: The first build will download Chrome for Testing automatically. Subsequent builds reuse the cached download unless the version changes.
+> **Note**: The first build downloads Chrome for Testing. Subsequent builds reuse the cached download.
+
+---
+
+## Linux installation
+
+### AppImage (any Linux distro)
+
+```bash
+chmod +x WhatsApp\ Organizer-*.AppImage
+./WhatsApp\ Organizer-*.AppImage
+```
+
+### deb (Ubuntu, PopOS, Debian)
+
+```bash
+sudo dpkg -i whatsapp-organizer_*_amd64.deb
+```
+
+### AppImage vs deb
+
+| Format | Works on | Size | Notes |
+|--------|----------|------|-------|
+| AppImage | Any Linux distro | ~250MB | Portable, no install needed |
+| deb | Ubuntu, PopOS, Debian | ~100MB | Installs system-wide |
+
+---
+
+## CI/CD (GitHub Actions)
+
+The project includes a GitHub Actions workflow (`.github/workflows/build.yml`) that automatically builds for Windows and Linux.
+
+### Triggers
+
+| Event | Action |
+|-------|--------|
+| Push to `main` | Builds both platforms, uploads artifacts to the Actions tab |
+| Push tag `v*.*.*` | Builds both platforms + creates a GitHub Release with all binaries |
+
+### Setup GitHub Secrets
+
+To sign the Windows installer in CI, add these secrets in **Settings → Secrets and variables → Actions**:
+
+| Secret | Value |
+|--------|-------|
+| `WIN_CSC_LINK` | Base64 of `cert/cert.pfx` |
+| `WIN_CSC_KEY_PASSWORD` | Certificate password |
+
+Generate the base64 value:
+
+```powershell
+[Convert]::ToBase64String([IO.File]::ReadAllBytes((Resolve-Path "cert/cert.pfx").Path))
+```
+
+Secrets are optional — unsigned builds still work.
+
+### Release workflow
+
+1. Bump version in `package.json`
+2. Tag and push:
+   ```bash
+   git tag v1.0.1
+   git push origin v1.0.1
+   ```
+3. Go to the repo's **Actions** tab — the `Build` workflow runs
+4. When complete, a GitHub Release is created with all platform binaries
+5. Users download from the **Releases** page
 
 ---
 
@@ -142,8 +212,14 @@ Laura/
 │       ├── renderer.js  # UI logic
 │       └── style.css    # Styles with dark mode and animations
 ├── clientes.json        # Phone number → company name mapping
-├── electron-builder.yml # Packaging configuration
+├── electron-builder.yml # Cross-platform packaging configuration
 ├── package.json         # Dependencies and scripts
+├── scripts/
+│   ├── download-chrome.js   # Cross-platform Chrome download (Node.js)
+│   ├── generate-cert.ps1    # Windows code signing certificate
+│   └── trust-cert.ps1       # Trust certificate on client machines
+├── .github/workflows/
+│   └── build.yml            # GitHub Actions CI/CD pipeline
 └── assets/
     └── icon.ico         # Application icon
 ```
@@ -218,7 +294,7 @@ Laura/
 | better-sqlite3 | 12.11.1  | Dedup database                   |
 | qrcode         | 1.5.4    | QR generation in the client      |
 | date-fns       | 4.4.0    | Date utilities                   |
-| electron-builder| 26.15.3 | Windows packaging                |
+| electron-builder| 26.15.3 | Cross-platform packaging (Windows NSIS + Linux AppImage/deb) |
 | pnpm           | 10.29.3  | Package manager                  |
 
 ---
