@@ -3,7 +3,7 @@
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const extract = require('extract-zip');
 
 const CHROME_VERSION = '146.0.7680.31';
 const ROOT_DIR = path.resolve(__dirname, '..');
@@ -59,10 +59,10 @@ function downloadFile(url, dest) {
   });
 }
 
-function extractZip(zipPath, outputDir) {
+async function extractZip(zipPath, outputDir) {
   console.log(`Extracting to ${outputDir}...`);
   try {
-    execSync(`tar -xf "${zipPath}" -C "${outputDir}"`, { stdio: 'inherit', timeout: 120000 });
+    await extract(zipPath, { dir: outputDir });
   } catch (err) {
     throw new Error(`Extraction failed: ${err.message}`);
   }
@@ -104,7 +104,7 @@ async function main() {
 
   // Extract
   try {
-    extractZip(zipPath, OUTPUT_DIR);
+    await extractZip(zipPath, OUTPUT_DIR);
   } catch (err) {
     console.error(`ERROR: ${err.message}`);
     process.exit(1);
