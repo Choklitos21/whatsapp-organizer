@@ -7,8 +7,8 @@
     "prebuild": "node ./scripts/download-chrome.js",
     "dev": "electron .",
     "build": "electron-builder --win --linux",
-    "build:win": "electron-builder --win",
-    "build:linux": "electron-builder --linux"
+    "build:win": "node ./scripts/download-chrome.js && electron-builder --win",
+    "build:linux": "node ./scripts/download-chrome.js && electron-builder --linux"
   },
   "keywords": [],
   "author": "Choklitos",
