@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+
+# WhatsApp
+.wwebjs_cache/
+wwebjs_auth/
+
+# Database
+procesados.db
+
+# Build output
+dist/
+build/
+out/
+
+# Config with sensitive data
+clientes.json
+
+# Environment
+.env
+.env.*
+
+# Agent files
+AGENTS.md
+.agents/
+skills-lock.json
+
+# Logs
+*.log
+
+# OS files
+Thumbs.db
+Desktop.ini
+.DS_Store

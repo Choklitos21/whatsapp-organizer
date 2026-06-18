@@ -1,0 +1,25 @@
+{
+  "name": "whatsapp-organizer",
+  "version": "1.0.0",
+  "description": "Descarga y organiza automáticamente archivos recibidos por WhatsApp",
+  "main": "src/main.js",
+  "scripts": {
+    "dev": "electron .",
+    "build": "electron-builder --win"
+  },
+  "keywords": [],
+  "author": "Choklitos",
+  "license": "ISC",
+  "packageManager": "pnpm@10.29.3",
+  "devDependencies": {
+    "@electron/rebuild": "^4.0.4",
+    "electron": "^42.4.1",
+    "electron-builder": "^26.15.3"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.11.1",
+    "date-fns": "^4.4.0",
+    "qrcode": "^1.5.4",
+    "whatsapp-web.js": "^1.34.7"
+  }
+}

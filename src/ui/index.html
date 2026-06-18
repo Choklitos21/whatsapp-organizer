@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WhatsApp Organizer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ── Barra superior ── -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="app-name">WhatsApp Organizer</span>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-toggle-theme" id="btn-toggle-theme" title="Cambiar tema">
+        <span id="theme-icon">☀</span>
+      </button>
+      <button class="btn btn-sm btn-danger" id="btn-logout">
+        Cerrar sesión
+      </button>
+      <div class="status-pill" id="status-pill">
+        <span class="status-spinner" id="status-spinner"></span>
+        <span class="status-dot" id="status-dot"></span>
+        <span class="status-text" id="status-text">Iniciando...</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Contenido principal ── -->
+  <main class="content">
+
+    <!-- Pantalla de carga (verificando sesión) -->
+    <section class="screen" id="screen-loading">
+      <div class="loading-card">
+        <div class="spinner"></div>
+      </div>
+    </section>
+
+    <!-- Pantalla de QR (solo cuando no hay sesión guardada) -->
+    <section class="screen hidden" id="screen-qr">
+      <div class="qr-card">
+        <p class="qr-instruction">
+          Abre WhatsApp en tu celular, ve a
+          <strong>Dispositivos vinculados</strong> y escanea este código.
+        </p>
+        <div class="qr-wrapper">
+          <img id="qr-img" src="" alt="Código QR de WhatsApp">
+          <div class="qr-placeholder" id="qr-placeholder">
+            <div class="spinner"></div>
+            <span>Generando QR...</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pantalla principal (visible tras vincularse) -->
+    <section class="screen hidden" id="screen-main">
+
+      <!-- Tarjetas de resumen -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <span class="stat-label">Archivos hoy</span>
+          <span class="stat-value" id="stat-today">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Total sesión</span>
+          <span class="stat-value" id="stat-total">0</span>
+        </div>
+        <div class="stat-card" id="card-path" title="">
+          <span class="stat-label">Carpeta de destino</span>
+          <span class="stat-value stat-path" id="stat-path">—</span>
+          <button class="btn-path-edit" id="btn-change-path">Cambiar</button>
+        </div>
+      </div>
+
+      <!-- Barra de acciones -->
+      <div class="actions-row">
+        <button class="btn" id="btn-open-folder">
+          Abrir carpeta
+        </button>
+        <button class="btn btn-secondary" id="btn-clean">
+          Limpiar registros antiguos
+        </button>
+        <button class="btn btn-secondary" id="btn-clients">
+          Gestionar clientes
+        </button>
+        <button class="btn btn-secondary" id="btn-sweep">
+          Re-buscar mensajes antiguos
+        </button>
+      </div>
+
+      <!-- Configuración de búsqueda -->
+      <div class="search-config-row">
+        <label for="days-search">Buscar mensajes de los últimos</label>
+        <input type="number" class="days-input" id="days-search"
+               min="1" max="365" value="5">
+        <span class="days-label">días</span>
+      </div>
+
+      <!-- Filtro de tipos de media -->
+      <div class="media-filter-row">
+        <span class="media-filter-label">Descargar:</span>
+        <label class="media-check">
+          <input type="checkbox" value="document" checked> Documentos
+        </label>
+        <label class="media-check">
+          <input type="checkbox" value="image" checked> Imágenes
+        </label>
+        <label class="media-check">
+          <input type="checkbox" value="video" checked> Videos
+        </label>
+        <label class="media-check">
+          <input type="checkbox" value="audio"> Audio
+        </label>
+        <label class="media-check">
+          <input type="checkbox" value="sticker"> Stickers
+        </label>
+      </div>
+
+      <!-- Log de archivos recibidos -->
+      <div class="log-header">
+        <span>Archivos recibidos</span>
+        <span class="log-count" id="log-count">0 archivos</span>
+      </div>
+      <div class="log-empty" id="log-empty">
+        Aún no se han recibido archivos en esta sesión.
+      </div>
+      <ul class="log-list" id="log-list"></ul>
+
+    </section>
+
+    <!-- Pantalla de error -->
+    <section class="screen hidden" id="screen-error">
+      <div class="error-card">
+        <span class="error-icon">⚠</span>
+        <p class="error-title" id="error-title">Error de conexión</p>
+        <p class="error-desc" id="error-desc">
+          Reinicia la aplicación e intenta de nuevo.
+        </p>
+      </div>
+    </section>
+
+    <!-- Barra de progreso inicial (visible durante carga y QR) -->
+    <div class="init-bar" id="init-bar">
+      <div class="init-bar-track">
+        <div class="init-bar-fill" id="init-bar-fill"></div>
+      </div>
+      <span class="init-bar-text" id="init-bar-text">Verificando sesión...</span>
+    </div>
+
+  </main>
+
+  <!-- ── Modal: Gestionar clientes ── -->
+  <div class="modal-overlay hidden" id="modal-clients">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Gestionar clientes</h2>
+        <button class="modal-close" id="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-section">
+          <h3 class="modal-section-title">Contactos de WhatsApp</h3>
+          <input type="text" class="modal-search" id="search-contacts"
+                 placeholder="Buscar por nombre o número...">
+          <div class="contacts-list" id="contacts-list">
+            <p class="modal-empty">Cargando contactos...</p>
+          </div>
+        </div>
+        <div class="modal-section">
+          <h3 class="modal-section-title">Clientes configurados</h3>
+          <div class="clients-list" id="clients-list">
+            <p class="modal-empty">No hay clientes configurados.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

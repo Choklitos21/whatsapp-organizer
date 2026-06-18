@@ -1,0 +1,34 @@
+appId: com.diego.whatsapp-organizer
+productName: WhatsApp Organizer
+copyright: Copyright © 2025 Cho
+
+directories:
+  output: dist
+  buildResources: assets
+
+files:
+  - src/**/*
+  - clientes.json
+  - package.json
+  - node_modules/**/*
+
+extraResources:
+  - from: clientes.json
+    to: clientes.json
+
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+  icon: assets/icon.ico
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: WhatsApp Organizer
+  installerIcon: assets/icon.ico
+  uninstallerIcon: assets/icon.ico
+  installerHeaderIcon: assets/icon.ico
+  deleteAppDataOnUninstall: false
